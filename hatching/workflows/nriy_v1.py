@@ -106,7 +106,7 @@ async def check_search_required(input: NriyV1Input, ctx: Context):
         )
     input_data = input.model_dump()
     input_data["current_context"] = json.dumps(await ctx.task_output(get_now_context))
-    prompt = await template.ainvoke(input)
+    prompt = await template.ainvoke(input_data)
     result = await classification_model \
         .with_structured_output(Output) \
         .ainvoke(prompt)
