@@ -1,8 +1,5 @@
 from hatching import hatchet
+from hatching.workflows.nriy_v1 import wf
 
-def main():
-    worker = hatchet.worker("nriy")
-    worker.start()
+worker = hatchet.worker("nriy", workflows=[wf])
 
-if __name__ == "__main__":
-    main()
