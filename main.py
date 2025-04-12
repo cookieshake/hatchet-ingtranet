@@ -12,3 +12,6 @@ def main():
     if worker is None:
         raise AttributeError(f"Worker class not found in module '{worker_name}'.")
     worker.start()
+
+if __name__ == "__main__":
+    main()
