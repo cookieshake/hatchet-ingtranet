@@ -9,7 +9,7 @@ from loguru import logger
 root_logger = logging.getLogger()
 class PropagateHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
-        root_logger.getChild(record.name).handle(record)
+        root_logger.handle(record)
 logger.add(
     PropagateHandler(),
     level=logging.DEBUG,
