@@ -9,7 +9,7 @@ class NriyV1Input(BaseModel):
     input: str
     channel_id: str
 
-wf = hatchet.workflow("nriy_v1", input_validator=NriyV1Input)
+wf = hatchet.workflow(name="nriy_v1", input_validator=NriyV1Input)
 
 @wf.task()
 def get_now_context(input: NriyV1Input):
