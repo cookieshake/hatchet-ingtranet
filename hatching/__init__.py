@@ -11,7 +11,7 @@ root_logger = logging.getLogger()
 
 class PropagateHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
-        root_logger.handle(record)
+        logging.getLogger(record.name).handle(record)
 
 logger.add(
     PropagateHandler(),
