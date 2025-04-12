@@ -105,7 +105,7 @@ async def check_search_required(input: NriyV1Input, ctx: Context):
             description="suggested Korean search keyword or phrase to use if search is needed"
         )
     input_data = input.model_dump()
-    input_data["current_context"] = json.dumps(ctx.task_output(get_now_context))
+    input_data["current_context"] = json.dumps(await ctx.task_output(get_now_context))
     prompt = await template.ainvoke(input)
     result = await classification_model \
         .with_structured_output(Output) \
