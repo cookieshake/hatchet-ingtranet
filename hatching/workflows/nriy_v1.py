@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from textwrap import dedent
+import json
 
 from pydantic import BaseModel, Field
 from hatchet_sdk import Context, ParentCondition
@@ -60,7 +61,7 @@ async def skip_result(input: NriyV1Input, ctx: Context):
     }
 
 @wf.task(
-    parents=[analyze],
+    parents=[get_now_context, analyze],
     skip_if=[
         ParentCondition(
             parent=analyze,
@@ -103,7 +104,8 @@ async def check_search_required(input: NriyV1Input, ctx: Context):
         query_string: str = Field(
             description="suggested Korean search keyword or phrase to use if search is needed"
         )
-
+    input_data = input.model_dump()
+    input_data["current_context"] = json.dumps(ctx.task_output(get_now_context))
     prompt = await template.ainvoke(input)
     result = await classification_model \
         .with_structured_output(Output) \
