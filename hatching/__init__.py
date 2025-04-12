@@ -6,10 +6,13 @@ load_dotenv()
 from hatchet_sdk import Hatchet, ClientConfig
 from loguru import logger
 
+logging.basicConfig(level=logging.INFO)
 root_logger = logging.getLogger()
+
 class PropagateHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         root_logger.handle(record)
+
 logger.add(
     PropagateHandler(),
     level=logging.DEBUG,

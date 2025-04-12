@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta, timezone
+import logging
 from textwrap import dedent
 import json
 
-from loguru import logger
 from pydantic import BaseModel, Field
 from hatchet_sdk import Context, ParentCondition
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 
 from hatching import hatchet
+
 
 classification_model = init_chat_model(
     "gpt-4o-mini",
@@ -31,6 +32,8 @@ async def get_now_context(input: NriyV1Input, ctx: Context):
 
 @wf.task()
 async def analyze(input: NriyV1Input, ctx: Context):
+    logger = logging.getLogger(__name__)
+
     template = ChatPromptTemplate.from_template(dedent("""
         아래 텍스트를 보고, 주어진 형식의 출력값을 만들어주세요.
         {input}
@@ -42,7 +45,7 @@ async def analyze(input: NriyV1Input, ctx: Context):
         )
 
     prompt = await template.ainvoke(input)
-    logger.debug(f"Prompt: {prompt}")
+    logger.info(f"Prompt: {prompt}")
     result = await classification_model \
         .with_structured_output(Output) \
         .ainvoke(prompt)
