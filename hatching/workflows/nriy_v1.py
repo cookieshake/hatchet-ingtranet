@@ -44,7 +44,7 @@ async def analyze(input: NriyV1Input, ctx: Context):
         )
 
     prompt = await template.ainvoke(input)
-    logger.debug(f"Prompt: {prompt}")
+    logger.info(f"Prompt: {prompt}")
     result = await classification_model \
         .with_structured_output(Output) \
         .ainvoke(prompt)
