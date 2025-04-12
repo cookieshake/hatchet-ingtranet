@@ -16,7 +16,7 @@ class PropagateHandler(logging.Handler):
 logger.add(
     PropagateHandler(),
     level=logging.DEBUG,
-    format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+    format="{message}",
 )
 
 hatchet = Hatchet(
