@@ -50,7 +50,7 @@ async def analyze(input: NriyV1Input, ctx: Context):
     skip_if=[
         ParentCondition(
             parent=analyze,
-            expression="output.uses_profanity == true",
+            expression="output.uses_profanity == false",
         )
     ]
 )
@@ -64,7 +64,7 @@ async def skip_result(input: NriyV1Input, ctx: Context):
     skip_if=[
         ParentCondition(
             parent=analyze,
-            expression="output.uses_profanity == false",
+            expression="output.uses_profanity == true",
         )
     ]
 )
