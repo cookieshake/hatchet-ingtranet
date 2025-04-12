@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from textwrap import dedent
 import json
 
+from loguru import logger
 from pydantic import BaseModel, Field
 from hatchet_sdk import Context, ParentCondition
 from langchain.chat_models import init_chat_model
@@ -41,6 +42,7 @@ async def analyze(input: NriyV1Input, ctx: Context):
         )
 
     prompt = await template.ainvoke(input)
+    logger.debug(f"Prompt: {prompt}")
     result = await classification_model \
         .with_structured_output(Output) \
         .ainvoke(prompt)
