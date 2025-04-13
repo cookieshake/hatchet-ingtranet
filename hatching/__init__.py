@@ -6,7 +6,7 @@ load_dotenv()
 from hatchet_sdk import Hatchet, ClientConfig
 from loguru import logger
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 root_logger = logging.getLogger()
 
 class PropagateHandler(logging.Handler):
