@@ -168,15 +168,14 @@ async def _get_context_with_naver_api(type: str, keyword: str):
     return context_str
 
 @wf.task(
-    parents=[check_search_required],
-    skip_if=[
-        ParentCondition(
-            parent=check_search_required,
-            expression="output.news_search == true",
-        )
-    ]
+    parents=[check_search_required]
 )
 async def get_news_context(input: NriyV1Input, ctx: Context):
+    if not (await ctx.task_output(check_search_required))["news_search"]:
+        return {
+            "context": "",
+            "type": "news"
+        }
     keyword = (await ctx.task_output(check_search_required))["query_string"]
     context = await _get_context_with_naver_api("news", keyword)
 
@@ -186,15 +185,14 @@ async def get_news_context(input: NriyV1Input, ctx: Context):
     }
 
 @wf.task(
-    parents=[check_search_required],
-    skip_if=[
-        ParentCondition(
-            parent=check_search_required,
-            expression="output.blog_search == true",
-        )
-    ]
+    parents=[check_search_required]
 )
 async def get_blog_context(input: NriyV1Input, ctx: Context):
+    if not (await ctx.task_output(check_search_required))["blog_search"]:
+        return {
+            "context": "",
+            "type": "blog"
+        }
     keyword = (await ctx.task_output(check_search_required))["query_string"]
     context = await _get_context_with_naver_api("blog", keyword)
 
@@ -204,15 +202,14 @@ async def get_blog_context(input: NriyV1Input, ctx: Context):
     }
 
 @wf.task(
-    parents=[check_search_required],
-    skip_if=[
-        ParentCondition(
-            parent=check_search_required,
-            expression="output.web_search == true",
-        )
-    ]
+    parents=[check_search_required]
 )
 async def get_web_context(input: NriyV1Input, ctx: Context):
+    if not (await ctx.task_output(check_search_required))["web_search"]:
+        return {
+            "context": "",
+            "type": "web"
+        }
     keyword = (await ctx.task_output(check_search_required))["query_string"]
     context = await _get_context_with_naver_api("webkr", keyword)
 
@@ -256,7 +253,7 @@ async def get_history_context(input: NriyV1Input, ctx: Context):
     }
 
 @wf.task(
-    parents=[get_now_context, get_history_context, get_news_context, get_blog_context, get_web_context]
+    parents=[get_history_context, get_news_context, get_blog_context, get_web_context]
 )
 async def generate_response(input: NriyV1Input, ctx: Context):
     template = ChatPromptTemplate([
