@@ -3,10 +3,11 @@ name = "hatchet-naying"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "hatchet-sdk>=1.3.2",
     "langchain[openai]>=0.3.23",
     "loguru>=0.7.3",
     "python-dotenv>=1.1.0",
+    "robyn>=0.65.0",
 ]

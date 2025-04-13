@@ -15,8 +15,8 @@ version = 1
 ##  $ flox show gum     <- show all versions of a package
 ## -------------------------------------------------------------------
 [install]
-python313.pkg-path = "python313"
 uv.pkg-path = "uv"
+python312.pkg-path = "python312"
 # gum.pkg-path = "gum"
 # gum.version = "^0.14.5"
 

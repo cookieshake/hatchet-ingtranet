@@ -3,8 +3,8 @@
   "manifest": {
     "version": 1,
     "install": {
-      "python313": {
-        "pkg-path": "python313"
+      "python312": {
+        "pkg-path": "python312"
       },
       "uv": {
         "pkg-path": "uv"
@@ -27,122 +27,122 @@
   },
   "packages": [
     {
-      "attr_path": "python313",
+      "attr_path": "python312",
       "broken": false,
-      "derivation": "/nix/store/zxaiahrwbr848i4k5zlnxjwwm32701zi-python3-3.13.2.drv",
+      "derivation": "/nix/store/bdsil73qdi3anlff462vyflfyz9hl3ny-python3-3.12.9.drv",
       "description": "High-level dynamically-typed programming language",
-      "install_id": "python313",
+      "install_id": "python312",
       "license": "Python-2.0",
       "locked_url": "https://github.com/flox/nixpkgs?rev=c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
-      "name": "python3-3.13.2",
-      "pname": "python313",
+      "name": "python3-3.12.9",
+      "pname": "python312",
       "rev": "c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
       "rev_count": 780821,
       "rev_date": "2025-04-08T07:41:42Z",
-      "scrape_date": "2025-04-10T01:11:12.124519Z",
+      "scrape_date": "2025-04-10T01:11:04.043141Z",
       "stabilities": [
         "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "python3-3.13.2",
+      "version": "python3-3.12.9",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/f55hdkj3px5v288jv6yai2gh5xrlj848-python3-3.13.2"
+        "out": "/nix/store/3p3agnh4792y8bgjp0s8xx5bym1ahpks-python3-3.12.9"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
       "priority": 5
     },
     {
-      "attr_path": "python313",
+      "attr_path": "python312",
       "broken": false,
-      "derivation": "/nix/store/b1idwl9msplfrhfrmlfclw1sc5cpafph-python3-3.13.2.drv",
+      "derivation": "/nix/store/bqiirv87dk88ipl1g0wn49a501dgyarn-python3-3.12.9.drv",
       "description": "High-level dynamically-typed programming language",
-      "install_id": "python313",
+      "install_id": "python312",
       "license": "Python-2.0",
       "locked_url": "https://github.com/flox/nixpkgs?rev=c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
-      "name": "python3-3.13.2",
-      "pname": "python313",
+      "name": "python3-3.12.9",
+      "pname": "python312",
       "rev": "c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
       "rev_count": 780821,
       "rev_date": "2025-04-08T07:41:42Z",
-      "scrape_date": "2025-04-10T01:28:11.303671Z",
+      "scrape_date": "2025-04-10T01:27:59.029715Z",
       "stabilities": [
         "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "python3-3.13.2",
+      "version": "python3-3.12.9",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "debug": "/nix/store/xs7r19skm9hlli72q7q1wck5da957bqc-python3-3.13.2-debug",
-        "out": "/nix/store/bs017cd4y2gzqc1sz3gw6v7hjwpyq3l6-python3-3.13.2"
+        "debug": "/nix/store/p2ym34g9y2w9k3w2pgbj2akn7b5l6xlh-python3-3.12.9-debug",
+        "out": "/nix/store/cxhrrsf7spcgdkrxmlbfzc1bh46rzf7w-python3-3.12.9"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
       "priority": 5
     },
     {
-      "attr_path": "python313",
+      "attr_path": "python312",
       "broken": false,
-      "derivation": "/nix/store/mrqjbsm8rifcrmbr79fyp5shg8i3q3ix-python3-3.13.2.drv",
+      "derivation": "/nix/store/k4a6ydp4ij2vzpk6zfgffx5yy9d58253-python3-3.12.9.drv",
       "description": "High-level dynamically-typed programming language",
-      "install_id": "python313",
+      "install_id": "python312",
       "license": "Python-2.0",
       "locked_url": "https://github.com/flox/nixpkgs?rev=c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
-      "name": "python3-3.13.2",
-      "pname": "python313",
+      "name": "python3-3.12.9",
+      "pname": "python312",
       "rev": "c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
       "rev_count": 780821,
       "rev_date": "2025-04-08T07:41:42Z",
-      "scrape_date": "2025-04-10T01:43:21.286809Z",
+      "scrape_date": "2025-04-10T01:43:13.238239Z",
       "stabilities": [
         "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "python3-3.13.2",
+      "version": "python3-3.12.9",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/wjxlppca1s14xzw5iz608qpywyl5mcdw-python3-3.13.2"
+        "out": "/nix/store/8fw6a4is5mkpmr9vd80inz63qdi130m3-python3-3.12.9"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
       "priority": 5
     },
     {
-      "attr_path": "python313",
+      "attr_path": "python312",
       "broken": false,
-      "derivation": "/nix/store/zpb40vj3bl1g36c3zlism3b3ir5pfz85-python3-3.13.2.drv",
+      "derivation": "/nix/store/xw08jjh95zyqrmanqwkdcyd97rg4wsxp-python3-3.12.9.drv",
       "description": "High-level dynamically-typed programming language",
-      "install_id": "python313",
+      "install_id": "python312",
       "license": "Python-2.0",
       "locked_url": "https://github.com/flox/nixpkgs?rev=c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
-      "name": "python3-3.13.2",
-      "pname": "python313",
+      "name": "python3-3.12.9",
+      "pname": "python312",
       "rev": "c8cd81426f45942bb2906d5ed2fe21d2f19d95b7",
       "rev_count": 780821,
       "rev_date": "2025-04-08T07:41:42Z",
-      "scrape_date": "2025-04-10T02:01:53.952629Z",
+      "scrape_date": "2025-04-10T02:01:40.892753Z",
       "stabilities": [
         "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "python3-3.13.2",
+      "version": "python3-3.12.9",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "debug": "/nix/store/ixcc4jnj3byz0hg943wadfy1phxkmmgg-python3-3.13.2-debug",
-        "out": "/nix/store/njpnqszjaj6k38cp4466ygn74n392xy1-python3-3.13.2"
+        "debug": "/nix/store/1kjknndig10774mkf6b2b95kn17q4rm5-python3-3.12.9-debug",
+        "out": "/nix/store/f2krmq3iv5nibcvn4rw7nrnrciqprdkh-python3-3.12.9"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
