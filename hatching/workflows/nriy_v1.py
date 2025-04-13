@@ -259,7 +259,7 @@ async def get_history_context(input: NriyV1Input, ctx: Context):
     parents=[get_now_context, get_history_context, get_news_context, get_blog_context, get_web_context]
 )
 async def generate_response(input: NriyV1Input, ctx: Context):
-    template = ChatPromptTemplate.from_template([
+    template = ChatPromptTemplate([
         "system",
         dedent("""
             당신은 여러 사람들이 참가해 있는 대화방에 들어와 있습니다.
