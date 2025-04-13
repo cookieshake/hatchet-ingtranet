@@ -178,7 +178,7 @@ async def _get_context_with_naver_api(type: str, keyword: str):
     ]
 )
 async def get_news_context(input: NriyV1Input, ctx: Context):
-    keyword = await ctx.task_output(check_search_required)["query_string"]
+    keyword = (await ctx.task_output(check_search_required))["query_string"]
     context = await _get_context_with_naver_api("news", keyword)
 
     return {
@@ -196,7 +196,7 @@ async def get_news_context(input: NriyV1Input, ctx: Context):
     ]
 )
 async def get_blog_context(input: NriyV1Input, ctx: Context):
-    keyword = await ctx.task_output(check_search_required)["query_string"]
+    keyword = (await ctx.task_output(check_search_required))["query_string"]
     context = await _get_context_with_naver_api("blog", keyword)
 
     return {
@@ -214,7 +214,7 @@ async def get_blog_context(input: NriyV1Input, ctx: Context):
     ]
 )
 async def get_web_context(input: NriyV1Input, ctx: Context):
-    keyword = await ctx.task_output(check_search_required)["query_string"]
+    keyword = (await ctx.task_output(check_search_required))["query_string"]
     context = await _get_context_with_naver_api("webkr", keyword)
 
     return {
@@ -226,7 +226,7 @@ async def get_web_context(input: NriyV1Input, ctx: Context):
     parents=[check_search_required]
 )
 async def get_history_context(input: NriyV1Input, ctx: Context):
-    search_keyword = await ctx.task_output(check_search_required)["query_string"]
+    search_keyword = (await ctx.task_output(check_search_required))["query_string"]
     url = "http://meilisearch.vd.ingtra.net:7700/indexes/chats/search"
     data = {
         "q": f"{input.input} {search_keyword}",
