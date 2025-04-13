@@ -154,9 +154,7 @@ async def _get_context_with_naver_api(type: str, keyword: str):
     result = [
         {
             "title": item["title"],
-            "link": item["link"],
-            "description": item["description"],
-            "pubDate": item["pubDate"]
+            "description": item["description"]
         }
         for item in result
     ]
