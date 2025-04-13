@@ -3,6 +3,7 @@ from textwrap import dedent
 import json
 import re
 import html
+import os
 
 from loguru import logger
 import httpx
@@ -134,8 +135,8 @@ async def check_search_required(input: NriyV1Input, ctx: Context):
 async def _get_context_with_naver_api(type: str, keyword: str):
     url = f"https://openapi.naver.com/v1/search/{type}.json"
     headers = {
-        "X-Naver-Client-Id": "0n6q6dWv5wGz0c2a1tZx",
-        "X-Naver-Client-Secret": "l3gk9q7r8j"
+        "X-Naver-Client-Id": os.environ["NAVER_CLIENT_ID"],
+        "X-Naver-Client-Secret": os.environ["NAVER_CLIENT_SECRET"]
     }
     params = {
         "query": keyword,
