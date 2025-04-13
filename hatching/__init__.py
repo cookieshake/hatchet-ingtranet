@@ -15,6 +15,7 @@ class PropagateHandler(logging.Handler):
 
 logger.add(
     PropagateHandler(),
+    level=logging.DEBUG,
     format="{message}",
 )
 
