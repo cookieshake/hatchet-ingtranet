@@ -297,10 +297,10 @@ async def generate_response(input: NriyV1Input, ctx: Context):
 
     prompt = await template.ainvoke({
         "current_context": json.dumps(await ctx.task_output(get_now_context)),
-        "history_context": json.dumps(await ctx.task_output(get_history_context))["context"],
-        "news_context": json.dumps(await ctx.task_output(get_news_context))["context"], 
-        "blog_context": json.dumps(await ctx.task_output(get_blog_context))["context"],
-        "web_context": json.dumps(await ctx.task_output(get_web_context))["context"],
+        "history_context": (await ctx.task_output(get_history_context))["context"],
+        "news_context": (await ctx.task_output(get_news_context))["context"], 
+        "blog_context": (await ctx.task_output(get_blog_context))["context"],
+        "web_context": (await ctx.task_output(get_web_context))["context"],
         "history": input.history,
         "input": input.input
     })
