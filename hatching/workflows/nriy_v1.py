@@ -57,11 +57,11 @@ async def analyze(input: NriyV1Input, ctx: Context):
         )
 
     prompt = await template.ainvoke(input)
-    logger.debug(f"prompt: {prompt}")
+    logger.info(f"prompt: {prompt}")
     result = await classification_model \
         .with_structured_output(Output) \
         .ainvoke(prompt)
-    logger.debug(f"result: {result}")
+    logger.info(f"result: {result}")
     return result.model_dump()
 
 @wf.task(
@@ -125,11 +125,11 @@ async def check_search_required(input: NriyV1Input, ctx: Context):
     input_data = input.model_dump()
     input_data["current_context"] = json.dumps(await ctx.task_output(get_now_context))
     prompt = await template.ainvoke(input_data)
-    logger.debug(f"prompt: {prompt}")
+    logger.info(f"prompt: {prompt}")
     result = await classification_model \
         .with_structured_output(Output) \
         .ainvoke(prompt)
-    logger.debug(f"result: {result}")
+    logger.info(f"result: {result}")
     return result.model_dump()
 
 async def _get_context_with_naver_api(type: str, keyword: str):
@@ -149,7 +149,7 @@ async def _get_context_with_naver_api(type: str, keyword: str):
         else:
             logger.error(f"Error: {response.status_code}, {response.text}")
             response.raise_for_status()
-    logger.debug(f"result: {result}")
+    logger.info(f"result: {result}")
     result = result.get("items", [])
     result = [
         {
@@ -164,7 +164,7 @@ async def _get_context_with_naver_api(type: str, keyword: str):
         context_str += f"  description: {item['description']}\n"
     context_str = re.sub(r"<[^>]+>", "", context_str)
     context_str = html.unescape(context_str)
-    logger.debug(f"context_str: {context_str}")
+    logger.info(f"context_str: {context_str}")
     return context_str
 
 @wf.task(
@@ -243,13 +243,13 @@ async def get_history_context(input: NriyV1Input, ctx: Context):
             logger.error(f"Error: {response.status_code}, {response.text}")
             response.raise_for_status()
     hits = result.get("hits", [])
-    logger.debug(f"hits: {hits}")
+    logger.info(f"hits: {hits}")
     context_str = "아래의 관련된 과거 대화들을 참고해서 답변하세요.\n"
     for item in hits:
         context_str += f"```\n"
         context_str += f"{item['text']}\n"
         context_str += f"```\n"
-    logger.debug(f"context_str: {context_str}")
+    logger.info(f"context_str: {context_str}")
     return {
         "context": context_str,
         "type": "history"
@@ -304,9 +304,9 @@ async def generate_response(input: NriyV1Input, ctx: Context):
         "history": input.history,
         "input": input.input
     })
-    logger.debug(f"prompt: {prompt}")
+    logger.info(f"prompt: {prompt}")
     message = await generation_model.ainvoke(prompt)
-    logger.debug(f"message: {message}")
+    logger.info(f"message: {message}")
     
     return {
         "reply": True,
