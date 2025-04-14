@@ -23,7 +23,7 @@ def parse_input(input: NriyRouterInput, ctx: Context):
         "authorName": event["author"]["name"],
         "content": event["content"],
         "logId": event["logId"],
-        "timestamp": event["timestamp"]
+        "timestamp": time.time_ns() // 1_000_000
     }
 
 @wf.task(
