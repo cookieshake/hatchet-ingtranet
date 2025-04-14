@@ -19,7 +19,7 @@ async def trigger_workflow(request: Request, path_params: PathParams):
     workflow_id = path_params["id"]
     ref = await hatchet._client.admin.aio_run_workflow(workflow_id, request.json())
     
-    return ref.result()
+    return await ref.aio_result()
 
 def main():
     import os
