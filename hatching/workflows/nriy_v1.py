@@ -65,20 +65,6 @@ async def analyze(input: NriyV1Input, ctx: Context):
     return result.model_dump()
 
 @wf.task(
-    parents=[analyze],
-    skip_if=[
-        ParentCondition(
-            parent=analyze,
-            expression="output.uses_profanity == false",
-        )
-    ]
-)
-async def skip_result(input: NriyV1Input, ctx: Context):
-    return {
-        "reply": False
-    }
-
-@wf.task(
     parents=[get_now_context, analyze],
     skip_if=[
         ParentCondition(
@@ -306,7 +292,6 @@ async def generate_response(input: NriyV1Input, ctx: Context):
     logger.info(f"message: {message}")
     
     return {
-        "reply": True,
         "message": message
     }
     

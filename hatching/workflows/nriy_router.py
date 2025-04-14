@@ -91,12 +91,24 @@ async def generate_reply(input: NriyRouterInput, ctx: Context):
         channel_id=input.channel_id
     ))
 
+    if result["generate_response"].get("skipped", False):
+        return {
+            "reply": False
+        }
+
     return {
-        "message": result.output["reply"]
+        "reply": True,
+        "message": result["generate_response"]["message"]
     }
 
 @wf.task(
-    parents=[generate_reply]
+    parents=[generate_reply],
+    skip_if=[
+        ParentCondition(
+            parent=generate_reply,
+            expression="output.reply == false",
+        )
+    ]
 )
 async def insert_reply(input: NriyRouterInput, ctx: Context):
     client = AsyncMongoClient(os.environ["MONGO_URI"])
