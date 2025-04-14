@@ -14,7 +14,6 @@ wf = hatchet.workflow(name="nriy_router")
 class NriyRouterInput(BaseModel):
     event_json: str
 
-    @computed_field
     @cached_property
     def parsed(self) -> dict:
         obj = json.loads(self.event_json)
