@@ -17,24 +17,9 @@ async def trigger_workflow(request: Request, path_params: PathParams):
     Trigger a workflow by ID.
     """
     workflow_id = path_params["id"]
-    payload = request.json
-    if not payload:
-        return {"error": "Payload is required"}, 400
-
-    # Import the workflow module dynamically
-    try:
-        module = import_module(f"hatching.workflows.{workflow_id}")
-    except ImportError:
-        return {"error": "Workflow not found"}, 404
-    workflow = getattr(module, "wf", None)
-    if not workflow:
-        return {"error": "Workflow not found"}, 404
+    ref = await hatchet._client.admin.aio_run_workflow(workflow_id, request.json())
     
-    result = await workflow.run(payload)
-    if result is None:
-        return {"error": "Workflow execution failed"}, 50
-    
-    return result
+    return ref.result()
 
 def main():
     import os
