@@ -26,7 +26,9 @@ def parse_input(input: NriyRouterInput, ctx: Context):
         "timestamp": event["timestamp"]
     }
 
-@wf.task()
+@wf.task(
+    parents=[parse_input]
+)
 async def insert_message(input: NriyRouterInput, ctx: Context):
     client = AsyncMongoClient(os.environ["MONGO_URI"])
     parsed = await ctx.task_output(parse_input)
@@ -50,7 +52,9 @@ async def insert_message(input: NriyRouterInput, ctx: Context):
         client.close()
     return {}
 
-@wf.task()
+@wf.task(
+    parents=[insert_message],
+)
 async def decide(input: NriyRouterInput, ctx: Context):
     parsed = await ctx.task_output(parse_input)
     if parsed["content"].startswith("/"):
