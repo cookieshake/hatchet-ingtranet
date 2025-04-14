@@ -54,7 +54,7 @@ async def decide(input: NriyRouterInput, ctx: Context):
     skip_if=[
         ParentCondition(
             parent=decide,
-            expression="output.reply == true",
+            expression="output.reply == false",
         )
     ]
 )
