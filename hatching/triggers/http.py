@@ -21,6 +21,16 @@ async def trigger_workflow(request: Request, path_params: PathParams):
     
     return await ref.aio_result()
 
+@app.exception
+async def handle_exception(error: Exception):
+    """
+    Handle exceptions and return a JSON response.
+    """
+    return {
+        "status": "error",
+        "message": str(error)
+    }
+
 def main():
     import os
     app.start(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
