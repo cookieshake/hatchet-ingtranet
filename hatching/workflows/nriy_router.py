@@ -92,7 +92,6 @@ async def generate_reply(input: NriyRouterInput, ctx: Context):
     ))
 
     return {
-        "doReply": True,
         "message": result.output["reply"]
     }
 
