@@ -20,7 +20,7 @@ def parse_input(input: NriyRouterInput, ctx: Context):
     return {
         "room": event["room"],
         "channelId": event["channelId"],
-        "authorName": event["authorName"],
+        "authorName": event["author"]["name"],
         "content": event["content"],
         "logId": event["logId"],
         "timestamp": event["timestamp"]
