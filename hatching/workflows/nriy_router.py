@@ -16,7 +16,7 @@ class NriyRouterInput(BaseModel):
 
     @computed_field
     @cached_property
-    def parsed(self):
+    def parsed(self) -> dict:
         obj = json.loads(self.event_json)
         return {
             "room": obj["room"],
