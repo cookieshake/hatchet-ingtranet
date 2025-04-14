@@ -114,14 +114,6 @@ async def insert_reply(input: NriyRouterInput, ctx: Context):
     client = AsyncMongoClient(os.environ["MONGO_URI"])
     try:
         collection = client["nriy"]["chats"]
-        await collection.insert_one({
-            "room": input.room,
-            "channelId": input.channel_id,
-            "authorName": "나란잉여",
-            "content": input.content,
-            "logId": f"{input.log_id}-reply",
-            "timestamp": time.time_ns() // 1_000_000
-        })
         log_id = f"{input.log_id}-reply"
         await collection.update_one(
             {"logId": log_id},
