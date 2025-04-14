@@ -118,10 +118,25 @@ async def insert_reply(input: NriyRouterInput, ctx: Context):
             "room": input.room,
             "channelId": input.channel_id,
             "authorName": "나란잉여",
-            "content": input.message,
+            "content": input.content,
             "logId": f"{input.log_id}-reply",
             "timestamp": time.time_ns() // 1_000_000
         })
+        log_id = f"{input.log_id}-reply"
+        await collection.update_one(
+            {"logId": log_id},
+            {
+                "$setOnInsert": {
+                    "room": input.room,
+                    "channelId": input.channel_id,
+                    "authorName": "나란잉여",
+                    "content": input.content,
+                    "logId": log_id,
+                    "timestamp": input.timestamp
+                }
+            },
+            upsert=True
+        )
     finally:
         client.close()
     return {}
