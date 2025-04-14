@@ -8,6 +8,7 @@ dependencies = [
     "hatchet-sdk>=1.3.2",
     "langchain[openai]>=0.3.23",
     "loguru>=0.7.3",
+    "pymongo>=4.12.0",
     "python-dotenv>=1.1.0",
     "robyn>=0.65.0",
 ]
