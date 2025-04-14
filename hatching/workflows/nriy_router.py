@@ -14,7 +14,6 @@ wf = hatchet.workflow(name="nriy_router")
 class NriyRouterInput(BaseModel):
     event_json: str
 
-    @cached_property
     def parsed(self) -> dict:
         obj = json.loads(self.event_json)
         return {
@@ -33,15 +32,15 @@ async def insert_message(input: NriyRouterInput, ctx: Context):
     try:
         collection = client["nriy"]["chats"]
         await collection.update_one(
-            {"logId": input.parsed["logId"]},
+            {"logId": input.parsed()["logId"]},
             {
                 "$setOnInsert": {
-                    "room": input.parsed["room"],
-                    "channelId": input.parsed["channelId"],
-                    "authorName": input.parsed["authorName"],
-                    "content": input.parsed["content"],
-                    "logId": input.parsed["logId"],
-                    "timestamp": input.parsed["timestamp"]
+                    "room": input.parsed()["room"],
+                    "channelId": input.parsed()["channelId"],
+                    "authorName": input.parsed()["authorName"],
+                    "content": input.parsed()["content"],
+                    "logId": input.parsed()["logId"],
+                    "timestamp": input.parsed()["timestamp"]
                 }
             },
             upsert=True
@@ -52,7 +51,7 @@ async def insert_message(input: NriyRouterInput, ctx: Context):
 
 @wf.task()
 async def decide(input: NriyRouterInput, ctx: Context):
-    if input.parsed["content"].startswith("/"):
+    if input.parsed()["content"].startswith("/"):
         return {"reply": True}
     else:
         return {"reply": False}
@@ -86,9 +85,9 @@ async def get_latest_history(input: NriyRouterInput, ctx: Context):
         collection = client["nriy"]["chats"]
         history = await collection.find(
             {
-                "channelId": input.parsed["channelId"],
+                "channelId": input.parsed()["channelId"],
                 "logId": {
-                    "$not": {"$eq": input.parsed["logId"]},
+                    "$not": {"$eq": input.parsed()["logId"]},
                 }
             } 
         ).sort("logId", -1).to_list(15)
@@ -110,8 +109,8 @@ async def generate_reply(input: NriyRouterInput, ctx: Context):
 
     result = await nriy_v1.aio_run(NriyV1Input(
         history=get_latest_history.output["history"],
-        input=input.parsed["content"],
-        channel_id=input.parsed["channelId"]
+        input=input.parsed()["content"],
+        channel_id=input.parsed()["channelId"]
     ))
 
     return {
@@ -127,11 +126,11 @@ async def insert_reply(input: NriyRouterInput, ctx: Context):
     try:
         collection = client["nriy"]["chats"]
         await collection.insert_one({
-            "room": input.parsed["room"],
-            "channelId": input.parsed["channelId"],
+            "room": input.parsed()["room"],
+            "channelId": input.parsed()["channelId"],
             "authorName": "나란잉여",
-            "content": input.parsed["message"],
-            "logId": f"{input.parsed['logId']}-reply",
+            "content": input.parsed()["message"],
+            "logId": f"{input.parsed()['logId']}-reply",
             "timestamp": time.time_ns() // 1_000_000
         })
     finally:
