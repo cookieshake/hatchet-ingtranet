@@ -22,7 +22,7 @@ async def task(input: NriyTaskInput, ctx: Context):
         timestamp=time.time_ns() // 1_000_000
     )
     result = await nriy_router.aio_run(router_input)
-    if result["generate_response"].get("reply", False):
+    if result["generate_reply"].get("reply", False):
         return {
             "doReply": False,
             "message": ""
@@ -30,6 +30,6 @@ async def task(input: NriyTaskInput, ctx: Context):
     else:
         return {
             "doReply": True,
-            "message": result["generate_response"]["message"]
+            "message": result["generate_reply"]["message"]
         }
         
