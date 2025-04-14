@@ -86,7 +86,7 @@ async def get_latest_history(input: NriyRouterInput, ctx: Context):
 async def generate_reply(input: NriyRouterInput, ctx: Context):
     from hatching.workflows.nriy_v1 import wf as nriy_v1, NriyV1Input
     result = await nriy_v1.aio_run(NriyV1Input(
-        history=get_latest_history.output["history"],
+        history=(await ctx.task_output(get_latest_history))["history"],
         input=input.content,
         channel_id=input.channel_id
     ))
