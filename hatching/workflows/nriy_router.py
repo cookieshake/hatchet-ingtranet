@@ -15,7 +15,7 @@ class NriyRouterInput(BaseModel):
     event_json: str
 
 @wf.task()
-def parse_input(input: NriyRouterInput, ctx: Context):
+async def parse_input(input: NriyRouterInput, ctx: Context):
     event = json.loads(input.event_json)
     return {
         "room": event["room"],
