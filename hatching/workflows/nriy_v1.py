@@ -292,6 +292,6 @@ async def generate_response(input: NriyV1Input, ctx: Context):
     logger.info(f"message: {message}")
     
     return {
-        "message": message
+        "message": message.content
     }
     
