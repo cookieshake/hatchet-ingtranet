@@ -12,38 +12,28 @@ from hatching import hatchet
 wf = hatchet.workflow(name="nriy_router")
 
 class NriyRouterInput(BaseModel):
-    event_json: str
+    room: str
+    channel_id: str
+    author_name: str
+    content: str
+    log_id: str
+    timestamp: int
 
 @wf.task()
-async def parse_input(input: NriyRouterInput, ctx: Context):
-    event = json.loads(input.event_json)
-    return {
-        "room": event["room"],
-        "channelId": event["channelId"],
-        "authorName": event["author"]["name"],
-        "content": event["content"],
-        "logId": event["logId"],
-        "timestamp": time.time_ns() // 1_000_000
-    }
-
-@wf.task(
-    parents=[parse_input]
-)
 async def insert_message(input: NriyRouterInput, ctx: Context):
     client = AsyncMongoClient(os.environ["MONGO_URI"])
-    parsed = await ctx.task_output(parse_input)
     try:
         collection = client["nriy"]["chats"]
         await collection.update_one(
-            {"logId": parsed["logId"]},
+            {"logId": input.log_id},
             {
                 "$setOnInsert": {
-                    "room": parsed["room"],
-                    "channelId": parsed["channelId"],
-                    "authorName": parsed["authorName"],
-                    "content": parsed["content"],
-                    "logId": parsed["logId"],
-                    "timestamp": parsed["timestamp"]
+                    "room": input.room,
+                    "channelId": input.channel_id,
+                    "authorName": input.author_name,
+                    "content": input.content,
+                    "logId": input.log_id,
+                    "timestamp": input.timestamp
                 }
             },
             upsert=True
@@ -52,29 +42,12 @@ async def insert_message(input: NriyRouterInput, ctx: Context):
         client.close()
     return {}
 
-@wf.task(
-    parents=[insert_message],
-)
+@wf.task()
 async def decide(input: NriyRouterInput, ctx: Context):
-    parsed = await ctx.task_output(parse_input)
-    if parsed["content"].startswith("/"):
+    if input.content.startswith("/"):
         return {"reply": True}
     else:
         return {"reply": False}
-
-@wf.task(
-    parents=[decide],
-    skip_if=[
-        ParentCondition(
-            parent=decide,
-            expression="output.reply == false",
-        )
-    ]
-)
-async def abandon(input: NriyRouterInput, ctx: Context):
-    return {
-        "doReply": False
-    }
 
 @wf.task(
     parents=[decide],
@@ -87,14 +60,13 @@ async def abandon(input: NriyRouterInput, ctx: Context):
 )
 async def get_latest_history(input: NriyRouterInput, ctx: Context):
     client = AsyncMongoClient(os.environ["MONGO_URI"])
-    parsed = await ctx.task_output(parse_input)
     try:
         collection = client["nriy"]["chats"]
         history = await collection.find(
             {
-                "channelId": parsed["channelId"],
+                "channelId": input.channel_id,
                 "logId": {
-                    "$not": {"$eq": parsed["logId"]},
+                    "$not": {"$eq": input.log_id},
                 }
             } 
         ).sort("logId", -1).to_list(15)
@@ -113,11 +85,10 @@ async def get_latest_history(input: NriyRouterInput, ctx: Context):
 )
 async def generate_reply(input: NriyRouterInput, ctx: Context):
     from hatching.workflows.nriy_v1 import wf as nriy_v1, NriyV1Input
-    parsed = await ctx.task_output(parse_input)
     result = await nriy_v1.aio_run(NriyV1Input(
         history=get_latest_history.output["history"],
-        input=parsed["content"],
-        channel_id=parsed["channelId"]
+        input=input.content,
+        channel_id=input.channel_id
     ))
 
     return {
@@ -130,15 +101,14 @@ async def generate_reply(input: NriyRouterInput, ctx: Context):
 )
 async def insert_reply(input: NriyRouterInput, ctx: Context):
     client = AsyncMongoClient(os.environ["MONGO_URI"])
-    parsed = await ctx.task_output(parse_input)
     try:
         collection = client["nriy"]["chats"]
         await collection.insert_one({
-            "room": parsed["room"],
-            "channelId": parsed["channelId"],
+            "room": input.room,
+            "channelId": input.channel_id,
             "authorName": "나란잉여",
-            "content": parsed["message"],
-            "logId": f"{parsed['logId']}-reply",
+            "content": input.message,
+            "logId": f"{input.log_id}-reply",
             "timestamp": time.time_ns() // 1_000_000
         })
     finally:
