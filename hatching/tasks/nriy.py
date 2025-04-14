@@ -1,6 +1,7 @@
 import json
 import time
 
+from hatchet_sdk import Context
 from pydantic import BaseModel
 
 from hatching import hatchet
@@ -10,7 +11,7 @@ class NriyTaskInput(BaseModel):
     event_json: str
 
 @hatchet.task(name="nriy", input_validator=NriyTaskInput)
-async def task(input: NriyTaskInput):
+async def task(input: NriyTaskInput, ctx: Context):
     parsed = json.loads(input.event_json)
     router_input = NriyRouterInput(
         room=parsed["room"],
