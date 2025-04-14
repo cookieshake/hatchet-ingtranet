@@ -11,6 +11,11 @@ app = Robyn(__file__)
 async def index(request: Request):
     return {"status": "ok"}
 
+@app.get("/workflows")
+async def list_workflows(request: Request):
+    workflows = await hatchet._client.workflows.aio_list()
+    return workflows.to_dict()
+
 @app.post("/workflows/:id")
 async def trigger_workflow(request: Request, path_params: PathParams):
     """
