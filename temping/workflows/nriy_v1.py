@@ -38,7 +38,7 @@ class NriyV1Input(BaseModel):
 async def get_now_context() -> dict:
     data = {
         # datetime in KST timezone
-        "현재시각": datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"),
+        workflow.now().astimezone(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M")
     }
 
     return {
