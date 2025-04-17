@@ -122,12 +122,8 @@ class NriyRouterWorkflow:
         generated = await workflow.execute_child_workflow(
             NriyV1Workflow.run,
             NriyV1Input(
-                room=input.room,
                 channel_id=input.channel_id,
-                author_name=input.author_name,
-                content=input.content,
-                log_id=input.log_id,
-                timestamp=input.timestamp,
+                input=input.content,
                 history=history
             )
         )
