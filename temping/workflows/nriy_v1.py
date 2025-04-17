@@ -12,8 +12,6 @@ from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 from temporalio import workflow, activity
 
-from temping import hatchet
-
 
 classification_model = init_chat_model(
     "gpt-4o-mini",
