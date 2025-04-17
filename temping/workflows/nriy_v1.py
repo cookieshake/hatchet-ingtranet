@@ -5,12 +5,14 @@ import re
 import html
 import os
 
-from loguru import logger
 import httpx
-from pydantic import BaseModel, Field
+
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
 from temporalio import workflow, activity
+
+with workflow.unsafe.imports_passed_through():
+    from pydantic import BaseModel, Field
 
 
 classification_model = init_chat_model(
