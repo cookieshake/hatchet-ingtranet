@@ -337,3 +337,18 @@ class NriyV1Workflow:
             "skipped": False,
             "message": response["message"]
         }
+
+activities = [
+    get_now_context,
+    analyze,
+    ready,
+    get_news_context,
+    get_blog_context,
+    get_web_context,
+    get_history_context,
+    generate_response
+]
+
+workflows = [
+    NriyV1Workflow
+]

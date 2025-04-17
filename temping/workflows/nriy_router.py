@@ -146,3 +146,6 @@ class NriyRouterWorkflow:
             "reply": True,
             "message": message,
         }
+
+activities = [insert_message, whether_to_reply, get_latest_history, insert_reply]
+workflows = [NriyRouterWorkflow]

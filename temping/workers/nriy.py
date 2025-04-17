@@ -3,8 +3,8 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 from temporalio.worker.workflow_sandbox import SandboxedWorkflowRunner, SandboxRestrictions
 
-from temping.workflows.nriy_router import NriyRouterWorkflow
-from temping.workflows.nriy_v1 import NriyV1Workflow
+from temping.workflows.nriy_router import workflows as nriy_router_workflows, activities as nriy_router_activities
+from temping.workflows.nriy_v1 import workflows as nriy_v1_workflows, activities as nriy_v1_activities
 
 from temporalio.contrib.pydantic import pydantic_data_converter
 
@@ -13,10 +13,8 @@ async def main():
     worker = Worker(
         client,
         task_queue="nriy",
-        workflows=[
-            NriyRouterWorkflow,
-            NriyV1Workflow,
-        ],
+        workflows=nriy_router_workflows + nriy_v1_workflows,
+        activities=nriy_router_activities + nriy_v1_activities,
         workflow_runner=SandboxedWorkflowRunner(
             restrictions=SandboxRestrictions.default.with_passthrough_all_modules()
         )
