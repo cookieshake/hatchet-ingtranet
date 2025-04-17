@@ -9,7 +9,7 @@ def main():
         if worker_name is None:
             raise ValueError("WORKER_NAME environment variable is not set.")
         try:
-            worker_module = __import__(f"hatching.workers.{worker_name}", fromlist=[""])
+            worker_module = __import__(f"temping.workers.{worker_name}", fromlist=[""])
         except ImportError as e:
             raise ImportError(f"Worker module '{worker_name}' not found.") from e
         worker = getattr(worker_module, "worker", None)
