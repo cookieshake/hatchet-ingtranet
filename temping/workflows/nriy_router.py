@@ -2,13 +2,13 @@ from functools import cached_property
 from datetime import timedelta
 import os
 
-from pymongo import AsyncMongoClient
 from temporalio import workflow, activity
 
 from temping.workflows.nriy_v1 import NriyV1Workflow, NriyV1Input
 
 with workflow.unsafe.imports_passed_through():
     from pydantic import BaseModel
+    from pymongo import AsyncMongoClient
 
 
 class NriyRouterInput(BaseModel):

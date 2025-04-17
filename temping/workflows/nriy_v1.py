@@ -5,13 +5,12 @@ import re
 import html
 import os
 
-import httpx
-
-from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate
 from temporalio import workflow, activity
 
 with workflow.unsafe.imports_passed_through():
+    import httpx
+    from langchain.chat_models import init_chat_model
+    from langchain_core.prompts import ChatPromptTemplate
     from pydantic import BaseModel, Field
 
 
