@@ -12,10 +12,10 @@ def main():
             worker_module = __import__(f"temping.workers.{worker_name}", fromlist=[""])
         except ImportError as e:
             raise ImportError(f"Worker module '{worker_name}' not found.") from e
-        worker = getattr(worker_module, "worker", None)
-        if worker is None:
-            raise AttributeError(f"Worker class not found in module '{worker_name}'.")
-        worker.start()
+        main = getattr(worker_module, "main", None)
+        if main is None:
+            raise AttributeError(f"main function not found in module '{worker_name}'.")
+        main()
     elif instance_type == "trigger":
         from temping.triggers.http import main
         main()
