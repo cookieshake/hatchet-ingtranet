@@ -21,4 +21,5 @@ async def main():
             restrictions=SandboxRestrictions.default.with_passthrough_all_modules()
         )
     )
+    print("Worker started")
     await worker.run()
