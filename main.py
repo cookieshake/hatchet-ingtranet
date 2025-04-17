@@ -17,7 +17,7 @@ def main():
             raise AttributeError(f"Worker class not found in module '{worker_name}'.")
         worker.start()
     elif instance_type == "trigger":
-        from hatching.triggers.http import main
+        from temping.triggers.http import main
         main()
 
 if __name__ == "__main__":

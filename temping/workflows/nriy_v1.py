@@ -8,11 +8,11 @@ import os
 from loguru import logger
 import httpx
 from pydantic import BaseModel, Field
-from hatchet_sdk import Context, ParentCondition
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
+from temporalio import workflow, activity
 
-from hatching import hatchet
+from temping import hatchet
 
 
 classification_model = init_chat_model(
@@ -35,17 +35,21 @@ class NriyV1Input(BaseModel):
     input: str
     channel_id: str
 
-wf = hatchet.workflow(name="nriy_v1", input_validator=NriyV1Input)
 
-@wf.task()
-async def get_now_context(input: NriyV1Input, ctx: Context):
-    return {
+@activity.defn
+async def get_now_context() -> dict:
+    data = {
         # datetime in KST timezone
         "현재시각": datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"),
     }
 
-@wf.task()
-async def analyze(input: NriyV1Input, ctx: Context):
+    return {
+        "context": json.dumps(data),
+        "context_type": "now"
+    }
+
+@activity.defn
+async def analyze(input: NriyV1Input):
     template = ChatPromptTemplate.from_template(dedent("""
         아래 텍스트를 보고, 주어진 형식의 출력값을 만들어주세요.
         {input}
@@ -64,16 +68,8 @@ async def analyze(input: NriyV1Input, ctx: Context):
     logger.info(f"result: {result}")
     return result.model_dump()
 
-@wf.task(
-    parents=[get_now_context, analyze],
-    skip_if=[
-        ParentCondition(
-            parent=analyze,
-            expression="output.uses_profanity == true",
-        )
-    ]
-)
-async def check_search_required(input: NriyV1Input, ctx: Context):
+@activity.defn
+async def ready(input: NriyV1Input, current_context: dict):
     template = ChatPromptTemplate.from_template(dedent("""
         당신은 여러 사람들이 참가해 있는 대화방에 들어와 있습니다.
         당신은 여러 사람들이 말하는 내용을 듣고, 알맞고 똑똑한 말을 대화방에서 할 수 있어야 합니다.
@@ -109,7 +105,7 @@ async def check_search_required(input: NriyV1Input, ctx: Context):
             description="suggested Korean search keyword or phrase to use if search is needed"
         )
     input_data = input.model_dump()
-    input_data["current_context"] = json.dumps(await ctx.task_output(get_now_context))
+    input_data["current_context"] = json.dumps(current_context)
     prompt = await template.ainvoke(input_data)
     logger.info(f"prompt: {prompt}")
     result = await classification_model \
@@ -153,65 +149,42 @@ async def _get_context_with_naver_api(type: str, keyword: str):
     logger.info(f"context_str: {context_str}")
     return context_str
 
-@wf.task(
-    parents=[check_search_required]
-)
-async def get_news_context(input: NriyV1Input, ctx: Context):
-    if not (await ctx.task_output(check_search_required))["news_search"]:
-        return {
-            "context": "",
-            "type": "news"
-        }
-    keyword = (await ctx.task_output(check_search_required))["query_string"]
+
+@activity.defn
+async def get_news_context(keyword: str):
     context = await _get_context_with_naver_api("news", keyword)
 
     return {
         "context": context,
-        "type": "news"
+        "context_type": "news"
     }
 
-@wf.task(
-    parents=[check_search_required]
-)
-async def get_blog_context(input: NriyV1Input, ctx: Context):
-    if not (await ctx.task_output(check_search_required))["blog_search"]:
-        return {
-            "context": "",
-            "type": "blog"
-        }
-    keyword = (await ctx.task_output(check_search_required))["query_string"]
+
+@activity.defn
+async def get_blog_context(keyword: str):
     context = await _get_context_with_naver_api("blog", keyword)
 
     return {
         "context": context,
-        "type": "blog"
+        "context_type": "blog"
     }
 
-@wf.task(
-    parents=[check_search_required]
-)
-async def get_web_context(input: NriyV1Input, ctx: Context):
-    if not (await ctx.task_output(check_search_required))["web_search"]:
-        return {
-            "context": "",
-            "type": "web"
-        }
-    keyword = (await ctx.task_output(check_search_required))["query_string"]
+
+@activity.defn
+async def get_web_context(keyword: str):
     context = await _get_context_with_naver_api("webkr", keyword)
 
     return {
         "context": context,
-        "type": "web"
+        "context_type": "web"
     }
 
-@wf.task(
-    parents=[check_search_required]
-)
-async def get_history_context(input: NriyV1Input, ctx: Context):
-    search_keyword = (await ctx.task_output(check_search_required))["query_string"]
+
+@activity.defn
+async def get_history_context(input: NriyV1Input, keyword: str):
     url = "http://meilisearch.vd.ingtra.net:7700/indexes/chats/search"
     data = {
-        "q": f"{input.input} {search_keyword}",
+        "q": f"{input.input} {keyword}",
         "hybrid": {
             "embedder": "jina-embeddings-v3"
         },
@@ -238,10 +211,9 @@ async def get_history_context(input: NriyV1Input, ctx: Context):
         "type": "history"
     }
 
-@wf.task(
-    parents=[get_history_context, get_news_context, get_blog_context, get_web_context]
-)
-async def generate_response(input: NriyV1Input, ctx: Context):
+
+@activity.defn
+async def generate_response(input: NriyV1Input, contexts: dict):
     template = ChatPromptTemplate([
         "system",
         dedent("""
@@ -254,8 +226,8 @@ async def generate_response(input: NriyV1Input, ctx: Context):
         dedent("""
             아래의 정보를 참고하세요.
             ```
-            # 일반정보
-            {current_context}
+            # 현재정보
+            {now_context}
 
             # 과거에 있었던 대화
             {history_context}
@@ -279,11 +251,11 @@ async def generate_response(input: NriyV1Input, ctx: Context):
     ])
 
     prompt = await template.ainvoke({
-        "current_context": json.dumps(await ctx.task_output(get_now_context)),
-        "history_context": (await ctx.task_output(get_history_context))["context"],
-        "news_context": (await ctx.task_output(get_news_context))["context"], 
-        "blog_context": (await ctx.task_output(get_blog_context))["context"],
-        "web_context": (await ctx.task_output(get_web_context))["context"],
+        "now_context": contexts["now"]["context"],
+        "history_context": contexts["history"]["context"],
+        "news_context": (contexts["news"]["context"] if "news" in contexts else ""), 
+        "blog_context": (contexts["blog"]["context"] if "blog" in contexts else ""),
+        "web_context": (contexts["web"]["context"] if "web" in contexts else ""),
         "history": input.history,
         "input": input.input
     })
@@ -295,3 +267,75 @@ async def generate_response(input: NriyV1Input, ctx: Context):
         "message": message.content
     }
     
+
+@workflow.defn
+class NriyV1Workflow:
+    @workflow.run
+    async def run(self, input: NriyV1Input):
+        current_context = await workflow.execute_activity(
+            get_now_context,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+        
+        result = await workflow.execute_activity(
+            analyze,
+            input,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+        if result["uses_profanity"]:
+            return {
+                "skipped": True
+            }
+        
+        ready_result = await workflow.execute_activity(
+            ready,
+            input,
+            current_context,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+
+        search_activities = []
+        if ready_result["news_search"]:
+            search_activities.append(
+                await workflow.start_activity(
+                    get_news_context,
+                    input,
+                    start_to_close_timeout=timedelta(seconds=10)
+                )
+            )
+        if ready_result["blog_search"]:
+            search_activities.append(
+                await workflow.start_activity(
+                    get_blog_context,
+                    input,
+                    start_to_close_timeout=timedelta(seconds=10)
+                )
+            )
+        if ready_result["web_search"]:
+            search_activities.append(
+                await workflow.start_activity(
+                    get_web_context,
+                    input,
+                    start_to_close_timeout=timedelta(seconds=10)
+                )
+            )
+        search_activities.append(
+            await workflow.start_activity(
+                get_history_context,
+                input,
+                start_to_close_timeout=timedelta(seconds=10)
+            )
+        )
+        search_results = [act.result() for act in search_activities]
+        search_contexts = {result["context_type"]: result["context"] for result in search_results}
+
+        response = await workflow.execute_activity(
+            generate_response,
+            input, search_contexts,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+
+        return {
+            "skipped": False,
+            "message": response["message"]
+        }

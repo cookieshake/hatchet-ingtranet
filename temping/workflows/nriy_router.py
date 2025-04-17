@@ -1,15 +1,14 @@
 from functools import cached_property
-import time
+from datetime import timedelta
 import json
 import os
 
 from pymongo import AsyncMongoClient
 from pydantic import BaseModel, computed_field
-from hatchet_sdk import Context, ParentCondition
+from temporalio import workflow, activity
 
-from hatching import hatchet
+from temping.workflows.nriy_v1 import NriyV1Workflow, NriyV1Input
 
-wf = hatchet.workflow(name="nriy_router")
 
 class NriyRouterInput(BaseModel):
     room: str
@@ -19,8 +18,8 @@ class NriyRouterInput(BaseModel):
     log_id: str
     timestamp: int
 
-@wf.task()
-async def insert_message(input: NriyRouterInput, ctx: Context):
+@activity.defn
+async def insert_message(input: NriyRouterInput) -> None:
     client = AsyncMongoClient(os.environ["MONGO_URI"])
     try:
         collection = client["nriy"]["chats"]
@@ -40,25 +39,17 @@ async def insert_message(input: NriyRouterInput, ctx: Context):
         )
     finally:
         client.close()
-    return {}
 
-@wf.task()
-async def decide(input: NriyRouterInput, ctx: Context):
+
+@activity.defn
+async def whether_to_reply(input: NriyRouterInput) -> bool:
     if input.content.startswith("/"):
-        return {"reply": True}
+        return True
     else:
-        return {"reply": False}
+        return False
 
-@wf.task(
-    parents=[decide],
-    skip_if=[
-        ParentCondition(
-            parent=decide,
-            expression="output.reply == false",
-        )
-    ]
-)
-async def get_latest_history(input: NriyRouterInput, ctx: Context):
+@activity.defn
+async def get_latest_history(input: NriyRouterInput) -> str:
     client = AsyncMongoClient(os.environ["MONGO_URI"])
     try:
         collection = client["nriy"]["chats"]
@@ -76,41 +67,10 @@ async def get_latest_history(input: NriyRouterInput, ctx: Context):
     output = []
     for item in history:
         output.append(f"{item['authorName']}: {item['content']}")
-    return {
-        "history": "\n".join(output)
-    }
+    return "\n".join(output)
 
-@wf.task(
-    parents=[get_latest_history]
-)
-async def generate_reply(input: NriyRouterInput, ctx: Context):
-    from hatching.workflows.nriy_v1 import wf as nriy_v1, NriyV1Input
-    result = await nriy_v1.aio_run(NriyV1Input(
-        history=(await ctx.task_output(get_latest_history))["history"],
-        input=input.content,
-        channel_id=input.channel_id
-    ))
-
-    if result["generate_response"].get("skipped", False):
-        return {
-            "reply": False
-        }
-
-    return {
-        "reply": True,
-        "message": result["generate_response"]["message"]
-    }
-
-@wf.task(
-    parents=[generate_reply],
-    skip_if=[
-        ParentCondition(
-            parent=generate_reply,
-            expression="output.reply == false",
-        )
-    ]
-)
-async def insert_reply(input: NriyRouterInput, ctx: Context):
+@activity.defn
+async def insert_reply(input: NriyRouterInput, reply_message: str) -> None:
     client = AsyncMongoClient(os.environ["MONGO_URI"])
     try:
         collection = client["nriy"]["chats"]
@@ -122,7 +82,7 @@ async def insert_reply(input: NriyRouterInput, ctx: Context):
                     "room": input.room,
                     "channelId": input.channel_id,
                     "authorName": "나란잉여",
-                    "content": input.content,
+                    "content": message,
                     "logId": log_id,
                     "timestamp": input.timestamp
                 }
@@ -132,3 +92,57 @@ async def insert_reply(input: NriyRouterInput, ctx: Context):
     finally:
         client.close()
     return {}
+
+
+@workflow.defn
+class NriyRouterWorkflow:
+    @workflow.run
+    async def run(self, input: NriyRouterInput):
+        await workflow.execute_activity(
+            insert_message,
+            input,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+
+        if not await workflow.execute_activity(
+            whether_to_reply,
+            input,
+            start_to_close_timeout=timedelta(seconds=10)
+        ):
+            return {
+                "reply": False
+            }
+
+        history = await workflow.execute_activity(
+            get_latest_history,
+            input,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+
+        generated = await workflow.execute_child_workflow(
+            NriyV1Workflow.run,
+            NriyV1Input(
+                room=input.room,
+                channel_id=input.channel_id,
+                author_name=input.author_name,
+                content=input.content,
+                log_id=input.log_id,
+                timestamp=input.timestamp,
+                history=history
+            )
+        )
+        if generated["skipped"] or generated["message"] == "":
+            return {
+                "reply": False
+            }
+
+        message = generated["message"]
+        await workflow.start_activity(
+            insert_reply,
+            input, message,
+            start_to_close_timeout=timedelta(seconds=10)
+        )
+        return {
+            "reply": True,
+            "message": message,
+        }
