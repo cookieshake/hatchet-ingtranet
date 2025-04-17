@@ -1,5 +1,7 @@
 import os
 
+import anyio
+
 def main():
     instance_type = os.getenv("INSTANCE_TYPE")
     if instance_type is None:
@@ -15,7 +17,7 @@ def main():
         main = getattr(worker_module, "main", None)
         if main is None:
             raise AttributeError(f"main function not found in module '{worker_name}'.")
-        main()
+        anyio.run(main)
     elif instance_type == "trigger":
         from temping.triggers.http import main
         main()

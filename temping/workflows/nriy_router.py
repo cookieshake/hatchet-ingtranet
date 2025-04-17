@@ -1,6 +1,5 @@
 from functools import cached_property
 from datetime import timedelta
-import json
 import os
 
 from pymongo import AsyncMongoClient

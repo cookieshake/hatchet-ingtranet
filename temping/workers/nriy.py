@@ -16,6 +16,3 @@ async def main():
         ]
     )
     await worker.run()
-
-if __name__ == "__main__":
-    anyio.run(main)
