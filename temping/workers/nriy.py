@@ -6,7 +6,7 @@ from temping.workflows.nriy_router import NriyRouterWorkflow
 from temping.workflows.nriy_v1 import NriyV1Workflow
 
 async def main():
-    client = await Client.connect("temporal-api.ingtra.net:443")
+    client = await Client.connect("temporal-api.ingtra.net:443", tls=True)
     worker = Worker(
         client,
         task_queue="nriy",

@@ -81,7 +81,7 @@ async def insert_reply(input: NriyRouterInput, reply_message: str) -> None:
                     "room": input.room,
                     "channelId": input.channel_id,
                     "authorName": "나란잉여",
-                    "content": message,
+                    "content": reply_message,
                     "logId": log_id,
                     "timestamp": input.timestamp
                 }
